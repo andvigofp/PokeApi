@@ -43,7 +43,6 @@ fun HomeScreen(
 ) {
     var questionCount by remember { mutableStateOf(5) }  // Valor por defecto de 5 preguntas
     var generationId by remember { mutableStateOf(1) }   // Valor por defecto para la generación
-    var typeName by remember { mutableStateOf("normal") }  // Valor por defecto para el tipo de Pokémon
 
     val gameOver = viewModel.gameOver
     val record = viewModel.record
@@ -52,6 +51,15 @@ fun HomeScreen(
     LaunchedEffect(gameOver) {
         if (gameOver) {
             onNavigateToGameOver() // Navegar a GameOverScreen
+        }
+    }
+
+    // Se ejecuta cada vez que el estado de gameOver cambia
+    LaunchedEffect(Unit) {
+        // Restablecer los valores de generación y pregunta cuando se vuelve a la pantalla de inicio
+        if (gameOver) {
+            generationId = 1  // Valor predeterminado
+            questionCount = 5  // Valor predeterminado
         }
     }
 
@@ -86,41 +94,7 @@ fun HomeScreen(
             enabled = !gameOver  // Deshabilitar el Slider cuando el juego haya terminado
         )
 
-        // Espacio entre el slider de generación y el selector de tipo
-        Spacer(modifier = Modifier.height(16.dp))
-
-        // Muestra el tipo de Pokémon
-        Text(text = "Tipo: $typeName")
-
-        // Lista deslizante horizontal para la selección de tipo de Pokémon
-        LazyRow(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 8.dp)
-        ) {
-            items(
-                listOf(
-                    "normal", "fire", "water", "grass", "electric", "ice", "fighting", "poison",
-                    "ground", "flying", "psychic", "bug", "rock", "ghost", "dark", "dragon",
-                    "steel", "fairy"
-                )
-            ) { type ->
-                Button(
-                    onClick = { typeName = type },
-                    modifier = Modifier
-                        .padding(4.dp)
-                        .height(50.dp)
-                        .border(1.dp, Color.Black, shape = CircleShape) // Borde para los botones
-                ) {
-                    Text(
-                        text = type.replaceFirstChar { it.uppercase() }, // Cambiar la primera letra a mayúscula
-                        style = MaterialTheme.typography.bodyMedium
-                    )
-                }
-            }
-        }
-
-        // Espacio entre el selector de tipo y el slider de número de preguntas
+        // Espacio entre el slider de generación y el slider de número de preguntas
         Spacer(modifier = Modifier.height(16.dp))
 
         // Muestra el número de preguntas
@@ -149,8 +123,8 @@ fun HomeScreen(
         ) {
             Button(
                 onClick = {
-                    viewModel.startGame(generationId, typeName, questionCount) // Inicia el juego con la generación, tipo y número de preguntas seleccionados
-                    onStartGame(generationId, typeName, questionCount) // Pasa la información a la siguiente pantalla
+                    viewModel.startGame(generationId, "normal", questionCount) // Inicia el juego con la generación y número de preguntas seleccionados
+                    onStartGame(generationId, "normal", questionCount) // Pasa la información a la siguiente pantalla
                 },
                 modifier = Modifier
                     .padding(end = 8.dp)
@@ -167,5 +141,6 @@ fun HomeScreen(
         }
     }
 }
+
 
 

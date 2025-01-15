@@ -46,6 +46,7 @@ class PokeViewModel : ViewModel() {
     private val gameFunctions = GameFunctions(this)
     private val uiFunctions = UiFunctions(this)
 
+
     // Métodos accesibles para GameFunctions
 
     fun startGame(generationId: Int, typeName: String, questionCount: Int) {
@@ -58,9 +59,26 @@ class PokeViewModel : ViewModel() {
         gameFunctions.moveToNextQuestion(navController)
     }
 
+    // Envía la respuesta seleccionada por el usuario
     fun submitAnswer(selectedIndex: Int, shuffledOptions: List<String>) {
-        gameFunctions.submitAnswer(selectedIndex, shuffledOptions)
+        // Obtener la pregunta actual
+        val currentQuestion = questions[currentQuestionIndex]
+
+        if (!answerShown) {
+            // Asegúrate de que la respuesta correcta es una lista (puede ser uno o más tipos)
+            val correctAnswers = currentQuestion.correct_answer // Esta debería ser una lista de tipos
+
+            // Verifica si la respuesta seleccionada está en la lista de respuestas correctas
+            val selectedAnswer = shuffledOptions[selectedIndex]
+            if (correctAnswers.contains(selectedAnswer)) {
+                updateScore(score + 1)
+            }
+
+            setAnswerShown(true)
+        }
     }
+
+
 
     // Los setters y getters de estos estados deben estar disponibles
     fun setTotalQuestions(value: Int) {
@@ -111,17 +129,29 @@ class PokeViewModel : ViewModel() {
         checkAndUpdateRecord(percentage)
     }
 
+    fun endGame() {
+        _pokeUiState.value = PokeUiState.GameOver // Actualiza el estado a GameOver
+    }
+
     fun updateRecordAndNavigate(navController: NavController) {
+        // Calcula el porcentaje de aciertos
         val percentage = (score * 100) / totalQuestions
+        // Actualiza el récord si el porcentaje es mayor
         if (percentage > record) {
             updateRecord(percentage)
         }
 
-        // Navegar a la pantalla de Game Over después de actualizar el récord
-        if (!_gameOver.value) {
-            setGameOver(true)  // Solo cambiar el estado una vez
+        // Solo cambiar el estado a GameOver si no lo ha hecho antes
+        if (_pokeUiState.value != PokeUiState.GameOver) {
+            // Llamar a endGame() para actualizar el estado a GameOver
+            endGame()
+
+            // Navegar a la pantalla de Game Over y asegurarse de que se vuelva al inicio correctamente
             navController.navigate(PokeApiSreen.GameOver.name) {
+                // Limpiar la pila de navegación para que no se regrese a la pantalla de juego
                 popUpTo(PokeApiSreen.Game.name) { inclusive = true }
+                launchSingleTop =
+                    true // Asegura que no se creen instancias adicionales de la pantalla
             }
         }
     }

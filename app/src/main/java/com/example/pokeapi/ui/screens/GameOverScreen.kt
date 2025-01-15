@@ -1,29 +1,21 @@
 package com.example.pokeapi.ui.screens
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import com.example.pokeapi.ui.state.PokeUiState
+import com.example.pokeapi.ui.navigation.PokeApiSreen
 import com.example.pokeapi.ui.state.PokeViewModel
 
 @Composable
@@ -32,10 +24,9 @@ fun GameOverScreen(
     generationId: Int,
     typeName: String,
     questionCount: Int,
-    onHome: () -> Unit,
-    onReplay: () -> Unit
+    onReplay: () -> Unit,
+    onHome: () -> Unit
 ) {
-    // Calcula el porcentaje final de aciertos
     val finalScorePercentage = if (viewModel.totalQuestions > 0) {
         (viewModel.score * 100) / viewModel.totalQuestions
     } else {
@@ -87,22 +78,24 @@ fun GameOverScreen(
             color = scoreColor
         )
 
-        // Botón para ir al inicio
+        // Botón para regresar al inicio
         Button(
             onClick = {
-                viewModel.checkAndUpdateRecord(clampedScore) // Asegura que el récord esté actualizado
-                onHome()
+                // Asegura que el récord esté actualizado y navega a la pantalla de inicio
+                viewModel.checkAndUpdateRecord(clampedScore)
+                onHome() // Llama a la función para navegar al inicio
             },
-            modifier = Modifier.padding(top = 16.dp)
+            modifier = Modifier.padding(horizontal = 16.dp)
         ) {
-            Text(text = "Inicio")
+            Text(text = "Volver al Inicio")
         }
 
         // Botón para reiniciar el juego
         Button(
             onClick = {
-                viewModel.startGame(generationId, typeName, questionCount) // Llamar a startGame con los parámetros correctos
-                onReplay()
+                // Reinicia el juego con los parámetros actuales
+                viewModel.startGame(generationId, typeName, questionCount)
+                onReplay() // Función para manejar el reinicio del juego
             },
             modifier = Modifier.padding(top = 8.dp)
         ) {

@@ -17,7 +17,8 @@ class UiFunctions(private val viewModel: PokeViewModel) {
             viewModel.setPokeUiState(PokeUiState.Loading)
             try {
                 // Llamada a la API para obtener los Pokémon por generación
-                val generationResponse = RetrofitClient.apiService.getPokemonByGeneration(generationId)
+                val generationResponse =
+                    RetrofitClient.apiService.getPokemonByGeneration(generationId)
 
                 // Extraer los nombres de los Pokémon de la respuesta
                 val pokemonNames = generationResponse.pokemon_species.map { it.name }
@@ -39,8 +40,10 @@ class UiFunctions(private val viewModel: PokeViewModel) {
         }
     }
 
-    // Genera preguntas basadas en los Pokémon obtenidos
-    private suspend fun generateQuestions(pokemonNames: List<String>, questionCount: Int): List<Question> {
+    private suspend fun generateQuestions(
+        pokemonNames: List<String>,
+        questionCount: Int
+    ): List<Question> {
         val questions = mutableListOf<Question>()
 
         // Seleccionamos los Pokémon al azar (limitado por la cantidad de preguntas)
@@ -55,27 +58,32 @@ class UiFunctions(private val viewModel: PokeViewModel) {
 
                     // Si obtenemos detalles del Pokémon correctamente
                     pokemonDetails?.let {
-                        // Obtener el primer tipo del Pokémon
-                        val type = it.types.first().type.name.capitalize()
+                        // Obtener los tipos del Pokémon (pueden ser uno o dos)
+                        val types = it.types.map { it.type.name.capitalize() }
 
-                        // Opciones fijas para respuestas incorrectas (puedes hacerlas dinámicas si lo prefieres)
-                        val options = listOf("Fire", "Water", "Grass", "Electric", "Normal")
+                        // Lista de tipos posibles
+                        val allTypes = listOf(
+                            "Fire", "Water", "Grass", "Electric", "Normal", "Bug", "Ghost", "Fairy",
+                            "Dragon", "Poison", "Fighting", "Ground", "Flying", "Psychic", "Rock",
+                            "Steel", "Ice", "Dark"
+                        )
 
-                        // Filtramos las respuestas incorrectas para que no incluya el tipo correcto
-                        val incorrectOptions = options.filter { it != type }
+                        // Filtramos las respuestas incorrectas para que no incluyan los tipos correctos
+                        val incorrectOptions = allTypes.filter { it !in types }
 
                         // Si no hay suficientes respuestas incorrectas, añadimos una opción por defecto
-                        val finalIncorrectOptions = if (incorrectOptions.isNotEmpty()) {
-                            incorrectOptions
+                        val finalIncorrectOptions = if (incorrectOptions.size >= 3) {
+                            incorrectOptions.shuffled()
+                                .take(3) // Tomamos 3 opciones incorrectas al azar
                         } else {
-                            listOf("Unknown") // Opción predeterminada si no hay respuestas incorrectas suficientes
+                            allTypes.filter { it !in types } // Si no hay suficientes, usamos todas las demás opciones
                         }
 
-                        // Crear la pregunta, ahora con el campo `type` incluido
+                        // Crear la pregunta, ahora con el campo `types` incluido
                         return@async Question(
-                            type = type, // Asignamos el tipo a la pregunta
-                            question = "¿De qué tipo es el Pokémon $pokemonName?",
-                            correct_answer = type,
+                            types = types, // Lista de tipos, que puede tener uno o dos tipos
+                            question = "¿De qué tipo(s) es el Pokémon $pokemonName?",
+                            correct_answer = types.joinToString(", "), // Los tipos correctos, separados por coma
                             incorrect_answers = finalIncorrectOptions
                         )
                     } ?: run {
@@ -90,7 +98,7 @@ class UiFunctions(private val viewModel: PokeViewModel) {
             }
         }
 
-        // Esperamos que todos los detalles de los Pokémon sean procesados
+        // Esperamos a que todas las preguntas se generen y las agregamos a la lista
         questions.addAll(deferredQuestions.awaitAll().filterNotNull())
         return questions
     }

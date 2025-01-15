@@ -1,11 +1,6 @@
 package com.example.pokeapi.ui.navigation
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -16,7 +11,6 @@ import com.example.pokeapi.ui.screens.GameScreen
 import com.example.pokeapi.ui.screens.HomeScreen
 import com.example.pokeapi.ui.state.PokeViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
-import kotlinx.coroutines.delay
 
 @Composable
 fun PokeApiApp(viewModel: PokeViewModel = viewModel()) {
@@ -62,7 +56,7 @@ fun PokeApiApp(viewModel: PokeViewModel = viewModel()) {
                     viewModel.updateRecordAndNavigate(navController)
                     // Navegar a la pantalla GameOver de forma inmediata
                     navController.navigate(PokeApiSreen.GameOver.name) {
-                        popUpTo(PokeApiSreen.Game.name) { inclusive = true }
+                        popUpTo(PokeApiSreen.Game.name) { inclusive = true } // Limpiar la pila
                     }
                 },
                 navController = navController
@@ -80,20 +74,19 @@ fun PokeApiApp(viewModel: PokeViewModel = viewModel()) {
                 typeName = typeName,
                 questionCount = questionCount,
                 onHome = {
-                    // Regresar a la pantalla principal
-                    viewModel.updateRecordAndNavigate(navController)
+                    // Limpiar la pila y navegar a la pantalla de inicio
                     navController.navigate(PokeApiSreen.Home.name) {
-                        popUpTo(PokeApiSreen.Home.name) { inclusive = true }
+                        popUpTo(PokeApiSreen.GameOver.name) { inclusive = true }
+                        launchSingleTop = true // Asegura que no haya duplicados
                     }
                 },
                 onReplay = {
-                    // Reiniciar el juego y volver a la pantalla de juego
+                    // Reiniciar el juego con los parámetros actuales
                     viewModel.startGame(generationId, typeName, questionCount)
                     navController.navigate("${PokeApiSreen.Game.name}/$generationId/$typeName/$questionCount") {
                         popUpTo(PokeApiSreen.GameOver.name) { inclusive = true }
                     }
                 }
-
             )
         }
     }
