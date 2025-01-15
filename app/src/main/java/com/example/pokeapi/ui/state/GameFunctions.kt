@@ -5,10 +5,10 @@ import com.example.pokeapi.model.Question
 
 class GameFunctions(private val viewModel: PokeViewModel) {
 
-    // Inicia el juego con un número específico de preguntas
-    fun startGame(questionCount: Int) {
+    // Inicia el juego con un número específico de preguntas y un ID de generación
+    fun startGame(generationId: Int, questionCount: Int) {
         viewModel.setTotalQuestions(questionCount)
-        viewModel.fetchQuestions(1, questionCount) // Asincrónico, espera las preguntas
+        viewModel.fetchQuestions(generationId, questionCount)  // Aquí pasas ambos parámetros
         viewModel.setGameOver(false)
         viewModel.setAnswerShown(false)
         viewModel.updateCurrentQuestionIndex(0)
@@ -52,4 +52,3 @@ class GameFunctions(private val viewModel: PokeViewModel) {
         viewModel.setAnswerShown(false)
     }
 }
-

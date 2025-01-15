@@ -49,11 +49,16 @@ class PokeViewModel : ViewModel() {
 
     // Métodos accesibles para GameFunctions
 
+    // Método de inicio de juego
     fun startGame(generationId: Int, typeName: String, questionCount: Int) {
+        // Establece el estado actual de la generación y el tipo
         _currentGenerationId.value = generationId
         _currentTypeName.value = typeName
-        gameFunctions.startGame(questionCount)
+
+        // Llama al método de GameFunctions para iniciar el juego
+        gameFunctions.startGame(generationId, questionCount)  // Pasa ambos valores correctamente
     }
+
 
     fun moveToNextQuestion(navController: NavController) {
         gameFunctions.moveToNextQuestion(navController)

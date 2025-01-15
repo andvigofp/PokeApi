@@ -17,8 +17,7 @@ class UiFunctions(private val viewModel: PokeViewModel) {
             viewModel.setPokeUiState(PokeUiState.Loading)
             try {
                 // Llamada a la API para obtener los Pokémon por generación
-                val generationResponse =
-                    RetrofitClient.apiService.getPokemonByGeneration(generationId)
+                val generationResponse = RetrofitClient.apiService.getPokemonByGeneration(generationId)
 
                 // Extraer los nombres de los Pokémon de la respuesta
                 val pokemonNames = generationResponse.pokemon_species.map { it.name }
@@ -99,7 +98,9 @@ class UiFunctions(private val viewModel: PokeViewModel) {
         }
 
         // Esperamos a que todas las preguntas se generen y las agregamos a la lista
-        questions.addAll(deferredQuestions.awaitAll().filterNotNull())
+        val generatedQuestions = deferredQuestions.awaitAll().filterNotNull()
+        questions.addAll(generatedQuestions)
+
         return questions
     }
 }
