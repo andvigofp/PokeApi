@@ -86,7 +86,7 @@ fun HomeScreen(
         Slider(
             value = generationId.toFloat(),
             onValueChange = { generationId = it.toInt() },
-            valueRange = 1f..8f,
+            valueRange = 1f..9f,
             steps = 7,
             modifier = Modifier
                 .fillMaxWidth()
